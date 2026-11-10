@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: sensor_data
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  fastapi_app:
+    build: .
+    container_name: fastapi_container
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:mysecretpassword@timescaledb:5432/sensor_data
+    depends_on:
+      - timescaledb
+    restart: always
+
+volumes:
+  pgdata:
+
+ 
